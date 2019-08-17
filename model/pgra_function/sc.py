@@ -27,13 +27,10 @@ def bpr_loss(p_score, n_score):
     return loss
 
 
-class LinkPredictor(torch.nn.Module):
+class Score(torch.nn.Module):
 
     def __init__(self, score='inner'):
         super().__init__()
-        self.score = score
-        self.score_func = None
-        assert score in _score_funcs
         self.score_func = _score_funcs[score]
 
     def forward(self, r, p1_feat, p2_feat, n1_feat, n2_feat):

@@ -55,25 +55,23 @@ def main(args):
     print("Reading...")
     g = read_hin(args.dataset)
     el = EdgeLabel(g)
-    el.split(n_val=0.1, n_test=0.9-args.train_ratio, seed=args.seed)
+    el.split(n_val=0.1, n_test=0.9 - args.train_ratio, seed=args.seed)
 
-    score = None
-    nb_loss = None
-    project = None
     if args.mode == 'DistMult':
         score = 'inner'
-        nb_loss = 'l2'
-        project = 'distmult'
+        p_reg = 2
+        proj_name = 'distmult'
     elif args.mode == 'TransH1':
         score = 'l1'
-        nb_loss = 'l1'
-        project = 'transh'
+        p_reg = 1
+        proj_name = 'transh'
     elif args.mode == 'TransH2':
         score = 'l2'
-        nb_loss = 'l2'
-        project = 'transh'
+        p_reg = 2
+        proj_name = 'transh'
 
-    t = Trainer(g, el, batch_size=args.batch_size, n_neighbor=args.n_nb, self_loop=True, score=score, project=project, nb_loss=nb_loss, l_reg=args.l_reg, degree=args.degree)
+    t = Trainer(g, el, batch_size=args.batch_size, n_neighbor=args.n_nb, self_loop=True, score=score,
+                proj_name=proj_name, p_reg=p_reg, l_reg=args.l_reg, degree=args.degree)
     t.run(lr=1e-4, patience=args.patience, max_steps=args.max_steps, cuda=True if args.gpu_device >= 0 else False)
 
 

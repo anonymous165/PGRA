@@ -7,7 +7,7 @@ from torch.nn import functional as F
 class TransH(nn.Module):
 
     def __init__(self, n_relation, emb_size, tied_emb=None):
-        super().__init__()
+        super(TransH, self).__init__()
         if tied_emb is not None:
             self.rela_emb = tied_emb
         else:

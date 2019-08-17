@@ -2,11 +2,11 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from model.modules.projection import TransH, DistMult
-from model.modules.rsim import CosineSim
-from model.modules.weight_init import weight_init, manual_init
-from model.modules.regularizer import Regularizer
-import model.modules.aggregator as agg
+from model.pgra_function.proj import TransH, DistMult
+from model.pgra_function.rsim import get_rsim
+from model.weight_init import weight_init, manual_init
+from model.modules.regularizer import NeighborRegularizer
+from model.modules.aggregator import Aggregator
 
 import numpy as np
 
@@ -18,7 +18,7 @@ def normalize(tensor):
 
 class PGRA(nn.Module):
 
-    def __init__(self, n_node, n_relation, emb_size, n_hop, n_neighbor, project, norm=False, nb_loss='l2', l_reg=0.):
+    def __init__(self, n_node, n_relation, emb_size, n_hop, n_neighbor, proj_name, norm=False, rsim_name='abs_cos', agg_name='neighbor', p_reg=2, l_reg=0.):
         super().__init__()
         self.node_emb = nn.Embedding(n_node, emb_size)
         self.rela_emb = nn.Embedding(n_relation, emb_size)
@@ -27,31 +27,25 @@ class PGRA(nn.Module):
         self.n_neighbor = n_neighbor
         self.norm = norm
 
-        rsim = CosineSim()
+        RSIM = get_rsim(rsim_name)
 
-        project = project.lower()
-        if project == 'transh':
-            self._projection = TransH(n_relation, emb_size, self.rela_emb)
-        elif project == 'distmult':
-            self._projection = DistMult(n_relation, emb_size, self.rela_emb)
+        proj_name = proj_name.lower()
+        if proj_name == 'transh':
+            self.projection = TransH(n_relation, emb_size, self.rela_emb)
+        elif proj_name == 'distmult':
+            self.projection = DistMult(n_relation, emb_size, self.rela_emb)
         else:
             raise Exception()
-        self.projection = self._projection
 
         self.aggregators = nn.ModuleList([
-            agg.RelaFeatAggregator(emb_size=emb_size, rsim=rsim) for _ in range(n_hop)
+            Aggregator(agg_name=agg_name, emb_size=emb_size, rsim=RSIM) for _ in range(n_hop)
         ])
 
         adj_node = np.zeros((n_node, n_neighbor))
         adj_rela = np.zeros((n_node, n_neighbor))
         self.register_neighbors(adj_node, adj_rela)
 
-        nb_loss = nb_loss.lower()
-        if nb_loss in ('l1', 'l2'):
-            self.reg = Regularizer(loss=nb_loss, l_reg=l_reg)
-            self.score_reg = lambda x, y: x-y
-        else:
-            raise Exception()
+        self.neighbor_regularizer = NeighborRegularizer(p=p_reg, l_reg=l_reg)
 
     def register_neighbors(self, adj_node, adj_rela, cuda=False):
         adj_node = torch.LongTensor(adj_node)
@@ -107,9 +101,9 @@ class PGRA(nn.Module):
                 entity_vectors_next_iter.append(vector)
                 if i == (self.n_hop-1):
                     if self.training:
-                        att = self.aggregators[i].att.detach()
+                        att = self.aggregators[i].att_score.detach()
                         att = att / (batch_size * att.size(1))
-                        self.reg(self.score_reg(vector.unsqueeze(-2), entity_vectors[hop+1].view(batch_size, -1, self.n_neighbor, self.emb_size)), weights=att)
+                        self.neighbor_regularizer(vector.unsqueeze(-2), entity_vectors[hop+1].view(batch_size, -1, self.n_neighbor, self.emb_size), weights=att)
             entity_vectors = entity_vectors_next_iter
         res = entity_vectors[0].view(batch_size, self.emb_size)
         return res

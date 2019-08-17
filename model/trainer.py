@@ -1,5 +1,5 @@
 from model.pgra import PGRA
-from model.link_predictor import LinkPredictor
+from model.pgra_function.sc import Score
 from data_utils.data_gen import LinkGenerator, init_seed_fn
 from torch.utils.data import DataLoader
 from time import perf_counter
@@ -43,7 +43,7 @@ class Trainer:
         self.model.register_neighbors(adj_node, adj_rela)
         self.model.reset()
 
-        self.lp_model = LinkPredictor(score=score)
+        self.lp_model = Score(score=score)
 
         link_gen_train = LinkGenerator(edge_label, graph.nodes_of_types, n_neg=n_neg)
         nt2id = dict(link_gen_train.node_type_to_id)
