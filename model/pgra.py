@@ -2,11 +2,11 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from modules.projection import TransH, DistMult
-from modules.rsim import CosineSim
-from modules.weight_init import weight_init, manual_init
-from modules.regularizer import Regularizer
-import modules.aggregator as agg
+from model.modules.projection import TransH, DistMult
+from model.modules.rsim import CosineSim
+from model.modules.weight_init import weight_init, manual_init
+from model.modules.regularizer import Regularizer
+import model.modules.aggregator as agg
 
 import numpy as np
 

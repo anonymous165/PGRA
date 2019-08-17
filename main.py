@@ -6,7 +6,7 @@ import config
 import random
 from data_utils.label import EdgeLabel
 from data_utils.hin_reader import read_hin
-from trainer import Trainer
+from model.trainer import Trainer
 
 
 def str2bool(v):

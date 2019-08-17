@@ -1,19 +1,18 @@
-from pgra import PGRA
-from link_predictor import LinkPredictor
+from model.pgra import PGRA
+from model.link_predictor import LinkPredictor
 from data_utils.data_gen import LinkGenerator, init_seed_fn
 from torch.utils.data import DataLoader
 from time import perf_counter
 import torch
-import math
 import numpy as np
 import config
-from modules.regularizer import Regularizer
+from model.modules.regularizer import Regularizer
 import tempfile
 from collections import Counter
 from tqdm import tqdm
 import os
 
-from tracker import LossTracker, MultiClsTracker
+from model.tracker import LossTracker, MultiClsTracker
 
 
 class Trainer:
