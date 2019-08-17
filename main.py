@@ -24,7 +24,7 @@ def parse_args():
     parser.add_argument('-m', '--mode', default='TransH1',
                         help='Mode (variant) of PGRA',
                         choices=['DistMult', 'TransH1', 'TransH2'])
-    parser.add_argument('-l', '--l-reg', default=5e-2, type=float,
+    parser.add_argument('-l', '--l-reg', default=1e-2, type=float,
                         help='lambda of neighbor regularizer')
     parser.add_argument('--emb-size', default=128, type=int)
     parser.add_argument('--n-nb', default=20, type=int,
@@ -34,8 +34,8 @@ def parse_args():
     parser.add_argument('--n-neg', default=5, type=int,
                         help='nagative samples')
     parser.add_argument('--max-steps', default=50000, type=int)
-    parser.add_argument('--patience', default=20, type=int)
-    parser.add_argument('--test-ratio', default=0.3, type=float)
+    parser.add_argument('--patience', default=30, type=int)
+    parser.add_argument('--train-ratio', default=0.6, type=float)
     parser.add_argument('--gpu-device', default=0, type=int)
     parser.add_argument('--workers', default=4, type=int,
                         help='Number of parallel processes for batch sampler.')
@@ -55,7 +55,7 @@ def main(args):
     print("Reading...")
     g = read_hin(args.dataset)
     el = EdgeLabel(g)
-    el.split(n_val=0.1, n_test=args.test_ratio, seed=args.seed)
+    el.split(n_val=0.1, n_test=0.9-args.train_ratio, seed=args.seed)
 
     score = None
     nb_loss = None
