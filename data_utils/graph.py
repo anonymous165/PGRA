@@ -75,7 +75,7 @@ class Graph(object):
 
     @staticmethod
     def name_edge_label(types):
-        return ''.join(types)
+        return '_'.join(types)
 
     def add_edge(self, src, dst, weight=1., directed=False, types=None, edge_type=None, **edge_attr):
         if types is None:
@@ -102,7 +102,7 @@ class Graph(object):
         else:
             self.directed_edge_types.add(_edge_id)
 
-    def read_edgelist(self, filename, directed=False, types=None):
+    def read_edgelist(self, filename, directed=False, types=None, edge_type=None):
         if types is None:
             types = (self._default_type, self._default_type)
         if self.G is None:
@@ -117,7 +117,7 @@ class Graph(object):
             w = 1.
             if len(data) == 3:
                 w = float(data[2])
-            self.add_edge(src, dst, w, directed, types)
+            self.add_edge(src, dst, w, directed, types, edge_type=edge_type)
         fin.close()
 
     def read_node_label(self, filename, node_type=None):

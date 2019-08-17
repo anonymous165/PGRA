@@ -29,8 +29,8 @@ class FeatAggregator(Aggregator):
             self.att_weight = nn.Linear(emb_size, emb_size, bias=False)
         else:
             self.att_weight = lambda x: x
-        self.att_h = nn.Linear(emb_size, 1)
-        self.att_t = nn.Linear(emb_size, 1)
+        self.att_h = nn.Linear(emb_size, 1, bias=False)
+        self.att_t = nn.Linear(emb_size, 1, bias=False)
         self.att_act = nn.LeakyReLU(0.2)
 
     def reset_parameters(self):

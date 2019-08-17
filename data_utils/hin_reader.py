@@ -1,31 +1,6 @@
 from data_utils import graph
 import config
 
-map_type = {
-    'author': 'a',
-    'paper': 'p',
-    'conference': 'c',
-    'conf': 'c',
-    'term': 't',
-    'ref': 'r',
-    'reference': 'r',
-
-    'business': 'b',
-    'location': 'l',
-    'user': 'u',
-    'category': 'c',
-
-    'movie': 'm',
-    'group': 'g',
-    'director': 'd',
-    'actor': 'a',
-    'type': 't',
-
-    'book': 'b',
-    'publisher': 'p',
-    'year': 'y',
-}
-
 
 def read_hin(ds='DBLP', verbose=1):
 
@@ -36,14 +11,12 @@ def read_hin(ds='DBLP', verbose=1):
     g = graph.Graph()
     g.name = ds
     for f in sorted((config.hin_dir / ds).glob('*.' + suffix)):
-        if verbose:
-            print(f.stem)
         f_types = get_types(f.stem)
-        if len(f_types) != 2:
-            continue
-        if f_types[0] in map_type and f_types[1] in map_type:
-            g.read_edgelist(f, types=list(map(lambda x: map_type[x], f_types)))
+        if 2 <= len(f_types) <= 3:
             if verbose:
-                print(f_types)
+                print('read:', f.name)
+        else:
+            print('skip:', f.name)
+        g.read_edgelist(f, types=f_types[:2], edge_type=f_types[2] if len(f_types) == 3 else None)
     g.sort()
     return g
